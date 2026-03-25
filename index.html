@@ -3089,10 +3089,19 @@
       if (!inputUrl) return alert('أدخل رابط السيرفر أو الـ IP أو /api');
       
       if (!inputUrl.startsWith('http://') && !inputUrl.startsWith('https://') && !inputUrl.startsWith('/')) {
-        if (/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(inputUrl)) {
-          inputUrl = `http://${inputUrl}:5000`;
+        // Check if it's an IP (with or without port)
+        if (inputUrl.match(/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}(:\d+)?$/)) {
+          inputUrl = `http://${inputUrl}`;
+          if (!inputUrl.includes(':')) inputUrl += ':5000';
         } else {
           inputUrl = `https://${inputUrl}`;
+        }
+      }
+      
+      if (window.location.protocol === 'https:' && inputUrl.startsWith('http://')) {
+        let useProxy = confirm("⚠️ موقعك (GitHub) يعمل باتصال آمن (HTTPS)، وسيرفر Wispbyte غير آمن (HTTP).\nستقوم المتصفحات بحظر الاتصال (Mixed Content).\n\nهل تريد استخدام وسيط (Proxy) مجاني لتخطي هذا الحظر؟\nاضغط OK للموافقة لجعله يعمل.");
+        if (useProxy) {
+            inputUrl = "https://corsproxy.io/?" + inputUrl;
         }
       }
       
