@@ -1767,6 +1767,60 @@
       background: rgba(0, 212, 170, 0.2);
       color: var(--green);
     }
+
+    /* Mobile Responsive */
+    @media (max-width: 768px) {
+      .main {
+        display: flex;
+        flex-direction: column;
+        height: auto;
+      }
+      .sidebar {
+        width: 100%;
+        border-left: none;
+        border-bottom: 1px solid var(--border);
+      }
+      .content {
+        width: 100%;
+      }
+      .actions-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      .login-box {
+        width: 90%;
+        padding: 24px 20px;
+      }
+      .header {
+        flex-wrap: wrap;
+        gap: 12px;
+        padding: 12px 16px;
+      }
+      .header-stats {
+        width: 100%;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+      .target-row {
+        flex-direction: column;
+      }
+      .target-row .btn {
+        width: 100%;
+      }
+      .stats-row {
+        flex-wrap: wrap;
+      }
+      .stat-card {
+        flex: 1 1 40%;
+      }
+      .modal {
+        padding: 20px;
+        width: 90%;
+      }
+      .db-stats-grid {
+        grid-template-columns: 1fr;
+      }
+    }
   </style>
 </head>
 
@@ -2169,19 +2223,17 @@
 
   <!-- Server Settings Modal -->
   <div class="modal-overlay" id="server-modal">
-    <div class="modal">
+    <div class="modal" style="width:500px">
       <h3>⚙️ إعدادات السيرفر</h3>
-      <p>أدخل عنوان IP الخاص بالكمبيوتر (شغّل <b>ipconfig</b> في CMD وخذ IPv4)</p>
+      <p>أدخل رابط السيرفر كاملاً (أو عنوان IP الخاص بالكمبيوتر)</p>
       <div class="modal-form">
-        <input class="inp" id="server-ip-inp" type="text" placeholder="192.168.1.xxx" dir="ltr"
-          style="font-size:16px;text-align:center">
+        <input class="inp" id="server-ip-inp" type="text" placeholder="https://akio-bot.wispbyte.io" dir="ltr"
+          style="font-size:14px;text-align:center">
         <div
           style="font-size:11px;color:var(--muted);background:rgba(0,212,170,0.07);border:1px solid rgba(0,212,170,0.2);border-radius:8px;padding:8px 10px;line-height:1.6">
-          📌 <b>كيف تعرف IP جهازك؟</b><br>
-          1. افتح <b>CMD</b> في الكمبيوتر<br>
-          2. اكتب <b>ipconfig</b><br>
-          3. انسخ <b>IPv4 Address</b> (مثال: 192.168.1.5)<br>
-          4. تأكد أن الموبايل والكمبيوتر على <b>نفس الشبكة WiFi</b>
+          📌 <b>ملاحظة هامة (لمستخدمي Vercel):</b><br>
+          يجب أن يبدأ الرابط بـ <b>https://</b> لأن Vercel يحظر الاتصال بـ http العادي لأسباب أمنية.<br><br>
+          <b>للاستخدام المحلي:</b> يمكنك إدخال IP الكمبيوتر (مثال: 192.168.1.5) إذا كنت تستخدم التطبيق محلياً.
         </div>
         <div class="modal-actions">
           <button class="btn btn-grad" style="flex:1" onclick="saveServerIP()">✅ حفظ</button>
@@ -3024,8 +3076,7 @@
 
     // Server Settings
     function showServerModal() {
-      const current = serverURL.replace('http://', '').replace(':5000', '');
-      document.getElementById('server-ip-inp').value = current;
+      document.getElementById('server-ip-inp').value = serverURL;
       document.getElementById('server-modal').classList.add('show');
     }
 
@@ -3034,9 +3085,18 @@
     }
 
     function saveServerIP() {
-      const ip = document.getElementById('server-ip-inp').value.trim();
-      if (!ip) return alert('أدخل عنوان IP');
-      serverURL = `http://${ip}:5000`;
+      let inputUrl = document.getElementById('server-ip-inp').value.trim();
+      if (!inputUrl) return alert('أدخل رابط السيرفر أو الـ IP');
+      
+      if (!inputUrl.startsWith('http://') && !inputUrl.startsWith('https://')) {
+        if (/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(inputUrl)) {
+          inputUrl = `http://${inputUrl}:5000`;
+        } else {
+          inputUrl = `https://${inputUrl}`;
+        }
+      }
+      
+      serverURL = inputUrl;
       localStorage.setItem('ig_server_url', serverURL);
       closeServerModal();
       checkServer();
